@@ -1,13 +1,17 @@
 import sqlite3
 from queries import *
 from datetime import datetime
-
+from read_all import *
+from tabulate import tabulate
 def main():
     db = sqlite3.connect('social.db')
     with db:
         setup_database(db)
 
 def setup_database(db):
+    lis = ["users", "accounts", "follows", "posts", "likes", "comments"]
+    get_all(db, lis)
+
     users = [
         ("dave@email.com", "Dave", "Martin"),
         ("emma@email.com", "Emma", "Clark"),
