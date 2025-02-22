@@ -44,8 +44,10 @@ def create_comment(db, post_id, username, message, posted_at):
                 (post_id, username, message, posted_at))
 
 def create_like(db, username, post_id):
-    db.execute("INSERT INTO likes (username, post_id) VALUES (?,?) ON DUPLICATE KEY DELETE FROM likes WHERE username = ? AND post_id = ?",
+    db.execute("INSERT INTO likes (username, post_id) VALUES (?,?)",
                 (username, post_id))
+    
+
     
 def create_follow(db, follower, followee):
     db.execute("INSERT INTO follows (follower, followee) VALUES (?,?)",
