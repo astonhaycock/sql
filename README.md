@@ -224,6 +224,31 @@ def recommended_follow(db, username):
 
 ---
 
+## Interactive CLI
+
+This application features an interactive command-line interface (CLI) allowing users to perform various social media actions:
+
+1. **Create User** - Register a new user with an email, first name, and last name.
+2. **Create Account** - Create an account with a unique username linked to an email.
+3. **Post** - Users can write and post messages.
+4. **Delete Post** - Remove a post from the database.
+5. **Comment** - Users can add comments on posts.
+6. **Update Comment** - Modify an existing comment.
+7. **Like** - Users can like a post.
+8. **Dislike** - Remove a like from a post.
+9. **Follow** - Follow another user.
+10. **Unfollow** - Unfollow a user.
+11. **Update Post** - Edit the content of a post.
+12. **Feed** - View posts from followed users.
+13. **Print All** - Display all records in the database.
+14. **Recommended Follow** - Suggest users to follow.
+15. **Recommended Post** - Suggest posts that might be of interest.
+16. **Exit** - Close the application.
+
+Users interact with the CLI by selecting an option, entering the necessary details, and viewing the results displayed in a formatted table. The application ensures smooth interaction with the SQLite database, handling user data efficiently.
+
+
+
 ## Summary
 
 This **social media database** supports:
