@@ -3,7 +3,11 @@ from queries import *
 from datetime import datetime
 from read_all import *
 from tabulate import tabulate
+import os
 def main():
+    os.system('rm -f social.db')
+    os.system('sqlite3 social.db < schema.sql')
+
     db = sqlite3.connect('social.db')
     with db:
         setup_database(db)
@@ -39,7 +43,7 @@ def setup_database(db):
         ("jack007", "jack@email.com"),
         ("karen202", "karen@email.com"),
         ("luke333", "luke@email.com"),
-        ("mona444", "mona@email.com")
+        ("mona444", "mona@email.com"),
     ]
     
     for username, email in accounts:
@@ -85,6 +89,7 @@ def setup_database(db):
     # Create likes (distinct users liking posts)
     likes = [
         ("frank123", posts[0][0]),
+        ("frank123", posts[3][0]),
         ("grace789", posts[1][0]),
         ("ivy101", posts[2][0]),
         ("jack007", posts[3][0]),
@@ -94,6 +99,7 @@ def setup_database(db):
         ("mona444", posts[7][0]),
         ("dave987", posts[8][0]),
         ("emma456", posts[9][0])
+
     ]
     
     for username, post_id in likes:
@@ -110,10 +116,118 @@ def setup_database(db):
         ("luke333", "henry654"),
         ("mona444", "karen202"),
         ("dave987", "luke333"),
-        ("emma456", "mona444")
+        ("emma456", "mona444"),
+        ("frank123", "grace789"),
+        ("grace789", "ivy101"),
+        ("ivy101", "jack007"),
+        ("jack007", "henry654"),
+        ("henry654", "karen202"),
+        ("karen202", "luke333"),
+        ("luke333", "mona444"),
+        ("mona444", "dave987"),
+        ("dave987", "emma456")
     ]
     
     for follower, followee in follows:
         create_follow(db, follower, followee)
+
+
+
+class db_functions:
+    def __init__(self, db):
+        self.db = db
+        self.cursor = db.cursor()
+
+
+    def get_all(self, db, tables):
+        for table in tables:
+            res = db.execute(f"Select * From {table}")
+            data = res.fetchall()
+            column_names = [description[0] for description in res.description]
+            print(tabulate(data, headers=column_names, tablefmt="fancy_grid"))
+
+    def add_account(self, db, username, email):
+        db.execute("INSERT INTO accounts (username, email) VALUES (?,?)", (username, email))
+
+    def create_user(self, db, email, first_name, last_name):
+        db.execute("INSERT INTO users (email, first_name, last_name) VALUES (?,?,?)", 
+                  (email, first_name, last_name))
+        
+    def create_post(self, db, username, message, posted_at):
+        db.execute("INSERT INTO posts (username, message, posted_at) VALUES (?,?,?)",
+                  (username, message, posted_at))
+    def create_comment(self, db, post_id, username, message, posted_at):
+        db.execute("INSERT INTO comments (post_id, username, message, posted_at) VALUES (?,?,?,?)",
+                  (post_id, username, message, posted_at))
+    
+    def create_like(self, db, username, post_id):
+        db.execute("INSERT INTO likes (username, post_id) VALUES (?,?) ON DUPLICATE KEY DELETE FROM likes WHERE username = ? AND post_id = ?",
+                  (username, post_id))
+        
+    def create_follow(self, db, follower, followee):
+        db.execute("INSERT INTO follows (follower, followee) VALUES (?,?)",
+                  (follower, followee))
+        
+
+    def recommended_follow(self, username):
+        query = """
+        SELECT DISTINCT f2.followee
+        FROM follows f1
+        JOIN follows f2 ON f1.followee = f2.follower
+        WHERE f1.follower = ?
+        AND f2.followee NOT IN (
+            SELECT followee 
+            FROM follows 
+            WHERE follower = ?
+        )
+        AND f2.followee != ?
+        """
+        res = self.db.execute(query, (username, username, username))
+        column_names = [description[0] for description in res.description]
+        return res.fetchall(), column_names
+    
+    def recommended_post(self, username):
+        query = """
+        SELECT * 
+        FROM posts 
+        WHERE (username IN (
+            SELECT DISTINCT f2.followee
+            FROM follows f1
+            JOIN follows f2 ON f1.followee = f2.follower
+            WHERE f1.follower = ?
+            AND f2.followee NOT IN (
+            SELECT followee 
+            FROM follows 
+            WHERE follower = ?
+            )
+            AND f2.followee != ?
+        )
+        OR username IN (
+            SELECT followee
+            FROM follows
+            WHERE follower = ?
+        ))
+        AND id NOT IN (
+            SELECT post_id
+            FROM likes
+            WHERE username = ?
+        )
+        """
+        res = self.db.execute(query, (username, username, username, username, username))
+        column_names = [description[0] for description in res.description]
+        return res.fetchall(), column_names
+
+db = sqlite3.connect('social.db')
+db_functions = db_functions(db)
+
+def pretty_print(data, column_names):
+    print(tabulate(data, headers=column_names, tablefmt="fancy_grid"))
+
+data,column_name = db_functions.recommended_post("frank123")
+
+pretty_print(data, column_name)
+
+
 if __name__ == "__main__":
-    main()
+    # main()
+    pass
