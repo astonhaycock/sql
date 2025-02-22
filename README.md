@@ -236,8 +236,7 @@ This **social media database** supports:
 
  **Future Improvements:**
 
-- Implementing **hashtags & search functionality**
-- Adding **notifications for likes & follows**
+- Implementing **More validation handling**
 - Optimizing queries for better performance
 
 ---
