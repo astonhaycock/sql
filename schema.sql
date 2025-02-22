@@ -42,7 +42,8 @@ CREATE TABLE likes (
 );
 
 CREATE TABLE comments (
-    post_id         INTEGER PRIMARY KEY,
+    id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id         INTEGER NOT NULL,
     username        TEXT NOT NULL,
     message         TEXT NOT NULL,
     posted_at       DATETIME NOT NULL,

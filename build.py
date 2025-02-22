@@ -12,7 +12,8 @@ def main():
     with db:
         setup_database(db)
 
-
+    get_all(db, ["users", "accounts", "follows", "posts", "likes", "comments"])
+    print("\n\n")
     def pretty_print(data, column_names):
         print(tabulate(data, headers=column_names, tablefmt="fancy_grid"))
 
@@ -22,7 +23,6 @@ def main():
 
 def setup_database(db):
     lis = ["users", "accounts", "follows", "posts", "likes", "comments"]
-    get_all(db, lis)
 
     users = data = [
     ("dave@email.com", "Dave", "Martin"),
