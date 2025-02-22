@@ -101,3 +101,71 @@ def recommended_post(db, username):
     res = db.execute(query, (username, username, username, username, username))
     column_names = [description[0] for description in res.description]
     return res.fetchall(), column_names
+
+def make_feed(db, username):
+    query = """
+    SELECT  p1.username, p1.message, p1.posted_at
+    FROM follows f1
+    JOIN posts p1 ON f1.followee = p1.username
+    WHERE f1.follower = ?
+    ORDER BY p1.posted_at DESC;
+    """
+    result = db.execute(query, (username,))
+    column_name = [description[0] for description in result.description]
+    return result.fetchall(),  column_name
+
+def delete_post(db,post_id):
+    try:
+        db.execute("DELETE FROM likes WHERE post_id = ?", (post_id,))
+
+        db.execute("DELETE FROM comments WHERE post_id = ?", (post_id,))
+
+        db.execute("DELETE FROM posts WHERE post_id = ?", (post_id,))
+
+        db.commit()
+        return True
+    
+    except Exception as e :
+        print(f"Error during deleting post: {e}")
+        return False
+
+def unfollow(db, follower, followee):
+    try:
+        db.execute("DELETE FROM follows WHERE follower = ? AND followee = ?", (follower, followee))
+        db.commit()
+        return True
+    except Exception as e :
+        print(f"Error when unfollowing: {e}")
+        return False
+
+
+def update_post(db, post_id, message):
+    try:
+        result = db.execute(
+            "UPDATE posts SET message = ? WHERE id = ?", 
+            (message, post_id)
+        )
+        db.commit()  
+        
+        if result.rowcount == 0: 
+            print("No post found with that ID.")
+            return False
+        
+        return True  
+    except Exception as e:
+        print(f"Error updating post: {e}")
+        return False
+
+def update_comment(db, post_id, message,comment_id):
+    try:
+        result = db.execute("UPDATE comments SET message = ? WHERE id = ? AND post_id = ?", (message,comment_id, post_id,))
+        db.commit()
+
+        if result.rowcount == 0:
+            print("No comment found with that id")
+            return False
+        
+        return True
+    except Exception as e :
+        print(f"Error updating comment {e}")
+        return False
