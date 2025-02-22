@@ -43,7 +43,6 @@ while True:
     first_name = input('Enter first name: ')
     last_name = input('Enter last name: ')
     create_user(db, email, first_name, last_name)
-    print('User created successfully')
   
   if(choice == 2):
     username = input('Enter username: ')

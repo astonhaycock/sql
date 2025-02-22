@@ -1,3 +1,13 @@
+def create_user(db, email, first_name, last_name):
+    existing_user = db.execute("SELECT 1 FROM users WHERE email = ?", (email,)).fetchone()
+    if existing_user:
+        print("User already exists.")
+        return
+    db.execute("INSERT INTO users (email, first_name, last_name) VALUES (?,?,?)", 
+               (email, first_name, last_name))
+    db.commit()
+    print("User created successfully")
+
 def add_account(db, username, email):
     existing_user = db.execute("SELECT 1 FROM users WHERE email = ?", (email,)).fetchone()
     if not existing_user:
@@ -7,25 +17,6 @@ def add_account(db, username, email):
     db.commit()
     print("account created successfully")
 
-def create_user(db, email, first_name, last_name):
-    db.execute("INSERT INTO users (email, first_name, last_name) VALUES (?,?,?)", 
-              (email, first_name, last_name))
-    db.commit()
-
-def delete_like(db, username, post_id):
-    db.execute("DELETE FROM likes WHERE username = ? AND post_id = ?", (username, post_id))
-    db.commit()
-    
-
-def get_all(db, tables):
-        for table in tables:
-            res = db.execute(f"Select * From {table}")
-            data = res.fetchall()
-            column_names = [description[0] for description in res.description]
-            print(tabulate(data, headers=column_names, tablefmt="fancy_grid"))
-
-
-    
 def create_post(db, username, message, posted_at):
     cursor = db.execute(
         "INSERT INTO posts (username, message, posted_at) VALUES (?,?,?)",
@@ -41,7 +32,6 @@ def create_post(db, username, message, posted_at):
     return (post, [description[0] for description in post.description])
 
 
-
 def create_comment(db, post_id, username, message, posted_at):
     cursor = db.execute("INSERT INTO comments (post_id, username, message, posted_at) VALUES (?,?,?,?)",
                 (post_id, username, message, posted_at))
@@ -49,6 +39,25 @@ def create_comment(db, post_id, username, message, posted_at):
     new_post_id = cursor.lastrowid
     db.commit()
     print(new_post_id)
+
+
+def delete_like(db, username, post_id):
+    db.execute("DELETE FROM likes WHERE username = ? AND post_id = ?", (username, post_id))
+    db.commit()
+    
+
+def get_all(db, tables):
+        for table in tables:
+            res = db.execute(f"Select * From {table}")
+            data = res.fetchall()
+            column_names = [description[0] for description in res.description]
+            print(tabulate(data, headers=column_names, tablefmt="fancy_grid"))
+
+
+    
+
+
+
 
 def create_like(db, username, post_id):
     db.execute("INSERT INTO likes (username, post_id) VALUES (?,?)",
@@ -164,7 +173,7 @@ def update_post(db, post_id, message):
         print(f"Error updating post: {e}")
         return False
 
-def update_comment(db, post_id, message,comment_id):
+def update_comment(db, post_id, message, comment_id):
     try:
         result = db.execute("UPDATE comments SET message = ? WHERE id = ? AND post_id = ?", (message,comment_id, post_id,))
         db.commit()
